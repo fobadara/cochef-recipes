@@ -1,2 +1,2 @@
 # cochef-recipes
-A recipe site
+A site that stores recipes.
