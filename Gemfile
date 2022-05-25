@@ -62,3 +62,5 @@ end
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
 
 gem 'net-smtp', require: false
+
+gem "jquery", "~> 0.0.1"
