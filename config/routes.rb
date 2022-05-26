@@ -1,4 +1,12 @@
 Rails.application.routes.draw do
-  resources :users
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  # root :users
+  devise_for :users
+  resources :foods, only: %i[index show new create destroy]
+
+  # Defines the root path route ("/")
+  root "home#index"
+
+  resources :recipes, only: [:index, :show, :new, :create, :destroy] do
+    resources :recipe_foods, only: %i[new create edit update destroy]
+  end
 end
