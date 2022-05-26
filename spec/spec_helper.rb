@@ -94,7 +94,7 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 
-  RSpec.configure do |config|
-    config.include Devise::TestHelpers, type: :requests
+  RSpec.configure do |configure|
+    configure.include Devise::TestHelpers, type: :requests
   end
 end
