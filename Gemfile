@@ -10,8 +10,9 @@ group :development, :test do
   gem 'rspec-rails'
 end
 
+gem 'rubocop', '>= 1.0', '< 2.0'
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails', branch: 'main'
-gem 'rails', '~> 6.1.6'
+gem 'rails', '~> 6.1.5', '>= 6.1.5.1'
 # Use postgresql as the database for Active Record
 gem 'pg', '~> 1.1'
 # Use Puma as the app server
@@ -61,6 +62,18 @@ end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: %i[mingw mswin x64_mingw jruby]
+
+#
+# Run against this stable release
+group :development, :test do
+  gem 'database_cleaner'
+  gem 'rails-controller-testing'
+  gem 'rspec-rails', '>= 5.1.0'
+end
+
+gem 'devise'
+
+gem 'cancancan'
 
 gem 'net-smtp', require: false
 
