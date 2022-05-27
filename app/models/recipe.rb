@@ -8,4 +8,4 @@ class Recipe < ApplicationRecord
     validates :cooking_time, presence: true
   
     has_one_attached :image
-end
+  end

@@ -1,48 +1,72 @@
 class RecipeFoodsController < ApplicationController
+  load_and_authorize_resource
   before_action :authenticate_user!
 
   def new
-    @recipe = Recipe.find_by(id: params[:recipe_id])
-    @recipe_food = RecipeFood.new
-  end
-
-  def create
-    @recipe_food = RecipeFood.new(food_id: params[:food][:food_id], recipe_id: params[:recipe_id],
-                                  quantity: params[:quantity])
-
-    if @recipe_food.save
-      redirect_to recipes_path, notice: 'Successfully added an ingredient.'
-    else
-      render :new, alert: 'Something happened.'
-    end
+    setup
   end
 
   def edit
-    @recipe_food = RecipeFood.find_by(id: params[:id])
+    setup
+    @recipe_food = RecipeFood.find(params[:id])
   end
 
-  def update
-    @recipe_food = RecipeFood.find_by(id: params[:id])
-    if @recipe_food.update(recipe_food_params)
-      redirect_to recipe_path(params[:recipe_id]), notice: 'Successfully modified food quantity.'
+  def create
+    setup
+    recipe_food = RecipeFood.new(recipe_food_params)
+    recipe_food.recipe_id = params[:recipe_id]
+    if recipe_food.save
+      flash[:success] = 'Food was successfully added to recipe.'
     else
-      render :new, alert: 'Could not modify food quantity'
+      flash[:danger] = 'Food was not added to recipe because <ul class="error-list">'
+      recipe_food.errors.full_messages.each do |msg|
+        flash[:danger] += "<li>#{msg}</li>"
+      end
+      flash[:danger] += '</ul>'
     end
+    redirect_to new_recipe_recipe_food_path(params[:recipe_id])
   end
 
   def destroy
-    @recipe_food = RecipeFood.destroy(params[:id])
-
-    if @recipe_food.destroyed?
-      redirect_to recipes_path, notice: 'Successfully deleted ingredient.'
-    else
-      render :new, alert: 'Could not delete ingredient.'
+    @recipe_food = RecipeFood.find(params[:id])
+    @recipe_food.destroy
+    respond_to do |format|
+      format.html do
+        flash[:success] = 'Recipe food deleted successfully'
+        redirect_back_or_to({ action: 'show', id: params[:recipe_id] })
+      end
     end
+  end
+
+  def update
+    recipe_food = RecipeFood.find(params[:id])
+
+    if recipe_food.update(recipe_food_update)
+      flash[:success] = "quantity for #{recipe_food.food.name} was successfully updated."
+    else
+      flash[:danger] = 'operation failed <ul class="error-list">'
+      recipe_food.errors.full_messages.each do |msg|
+        flash[:danger] += "<li>#{msg}</li>"
+      end
+      flash[:danger] += '</ul>'
+    end
+    redirect_to recipe_path(params[:recipe_id])
+  end
+
+  def setup
+    @recipe_food = RecipeFood.new
+    @recipe_food_ids = RecipeFood.all.where(recipe_id: params[:recipe_id]).pluck(:food_id)
+    @foods = Food.all.where(user_id: current_user.id).where.not(id: @recipe_food_ids).order(name: :asc)
+    @recipe = Recipe.find(params[:recipe_id])
   end
 
   private
 
   def recipe_food_params
+    params.require(:recipe_food).permit(:food_id, :quantity)
+  end
+
+  def recipe_food_update
     params.require(:recipe_food).permit(:quantity)
   end
 end

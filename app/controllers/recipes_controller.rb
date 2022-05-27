@@ -1,54 +1,64 @@
 class RecipesController < ApplicationController
-  before_action :authenticate_user!, only: %i[index new create destroy]
-
-  # load_and_authorize_resource
+  before_action :authenticate_user!, except: [:show]
 
   def index
-    @recipes = Recipe.where(user_id: current_user&.id)
+    @recipes = Recipe.all.where(user_id: current_user).order(created_at: :desc).with_attached_image
   end
 
   def show
-    @recipe = Recipe.find_by(id: params[:id])
-    @recipe_foods = RecipeFood.where(recipe_id: params[:id]).includes([:food])
+    @recipe = Recipe.find(params[:id])
+    @ingredients = RecipeFood.where(recipe_id: params[:id]).includes(:food)
   end
 
   def new
-    if current_user
-      @recipe = Recipe.new
-    else
-      redirect_to root_path, alert: 'You need to login in order to create a recipe.'
-    end
+    @user = current_user
+    @recipe = @user.recipes.new
+  end
+
+  def update
+    Recipe.find(params[:id]).update(public: params[:recipe][:public])
   end
 
   def create
-    @recipe = Recipe.new(recipe_params)
+    @user = current_user
+    @recipe = @user.recipes.new(recipe_params)
+    @recipe.preparation_time = "#{params[:recipe][:preparation_time]} minute(s)"
+    @recipe.cooking_time = "#{params[:recipe][:cooking_time]} minute(s)"
 
-    if @recipe.save
-      redirect_to recipes_path, notice: 'Successfully created recipe.'
-    else
-      render :new, alert: 'Could not create recipe.'
+    respond_to do |format|
+      format.html do
+        if @recipe.save
+          flash[:success] = 'Recipe created successfully'
+          redirect_to recipes_url
+        else
+          flash.now[:danger] = 'Recipe was not created because <ul class="error-list">'
+          @recipe.errors.full_messages.each do |msg|
+            flash.now[:danger] += "<li>#{msg}</li>"
+          end
+          flash.now[:danger] += '</ul>'
+          render :new
+        end
+      end
     end
   end
 
   def destroy
-    @recipe = Recipe.destroy(params[:id])
-
-    if @recipe.destroyed?
-      redirect_to recipes_path, notice: 'Successfully deleted recipe.'
+    recipe = Recipe.find(params[:id])
+    if recipe.destroy
+      flash[:success] = 'Recipe deleted successfully'
     else
-      render :new, alert: 'Could not delete recipe.'
+      flash.now[:danger] = 'Recipe deleted because <ul class="error-list">'
+      recipe.errors.full_messages.each do |msg|
+        flash[:danger] += "<li>#{msg}</li>"
+      end
+      flash[:danger] += '</ul>'
     end
-  end
-
-  def public_recipes
-    @recipes = Recipe.where(public: true).order(created_at: :desc)
+    redirect_to recipes_url
   end
 
   private
 
   def recipe_params
-    recipe_hash = params.require(:recipe).permit(:name, :description, :cooking_time, :preparation_time, :public)
-    recipe_hash[:user] = current_user
-    recipe_hash
+    params.require(:recipe).permit(:name, :preparation_time, :cooking_time, :public, :description, :image)
   end
 end
