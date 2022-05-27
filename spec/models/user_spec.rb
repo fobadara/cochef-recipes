@@ -1,26 +1,30 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  subject { User.create(name: 'Example User', email: 'abc@gmail.com', password: 'helloworld') }
-
-  before { subject.save }
-
-  it 'is valid with valid attributes' do
-    expect(subject).to be_valid
-  end
-
-  it 'is not valid without a name' do
-    subject.name = nil
-    expect(subject).to_not be_valid
-  end
-
-  it 'is not valid without an email' do
-    subject.email = nil
-    expect(subject).to_not be_valid
-  end
-
-  it 'is not valid with a duplicate email address' do
-    new_user = User.create(name: 'Josh', email: subject.email)
-    expect(new_user).to_not be_valid
+  describe 'Validation for user model' do
+    it 'should be valid with valid attributes' do
+      user = User.new(
+        email: 'test@mail.com',
+        password: '12345678',
+        password_confirmation: '12345678'
+      )
+      expect(user).to be_valid
+    end
+    it 'should not be valid without email' do
+      user = User.new(
+        email: nil,
+        password: '12345678',
+        password_confirmation: '12345678'
+      )
+      expect(user).to_not be_valid
+    end
+    it 'should not be valid without password' do
+      user = User.new(
+        email: 'test@mail.com',
+        password: nil,
+        password_confirmation: 'nil'
+      )
+      expect(user).to_not be_valid
+    end
   end
 end

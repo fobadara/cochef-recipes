@@ -12,7 +12,7 @@
 #       Install PostgreSQL and put its /bin directory on your path.
 #
 # Configure Using Gemfile
-# gem 'pg'
+# gem "pg"
 #
 default: &default
   adapter: postgresql
@@ -23,13 +23,15 @@ default: &default
 
 development:
   <<: *default
-  database: cochef_recipes_development
+  database: recipe_app_development
+  # username: postgres
+  # password: root
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
   # When left blank, postgres will use the default role. This is
   # the same name as the operating system user running Rails.
-  #username: cochef_recipes
+  #username: recipe_app
 
   # The password associated with the postgres role (username).
   #password:
@@ -57,7 +59,9 @@ development:
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: cochef_recipes_test
+  database: recipe_app_test
+  # username: postgres
+  # password: root
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -74,13 +78,13 @@ test:
 # URL environment variable explicitly:
 #
 #   production:
-#     url: <%= ENV['MY_APP_DATABASE_URL'] %>
+#     url: <%= ENV["MY_APP_DATABASE_URL"] %>
 #
 # Read https://guides.rubyonrails.org/configuring.html#configuring-a-database
 # for a full overview on how database connection configuration can be specified.
 #
 production:
   <<: *default
-  database: cochef_recipes_production
-  username: cochef_recipes
-  password: <%= ENV['COCHEF_RECIPES_DATABASE_PASSWORD'] %>
+  database: recipe_app_production
+  username: recipe_app
+  password: <%= ENV["RECIPE_APP_DATABASE_PASSWORD"] %>
