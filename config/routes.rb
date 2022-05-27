@@ -5,5 +5,8 @@ Rails.application.routes.draw do
   resources :foods, only: %i[index new create destroy]
   resources :general_shopping_lists, only: %i[index]
   resources :public_recipes, only: %i[index show]
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  resources :recipes, only: [:index, :show, :new, :create, :destroy] do
+    resources :recipe_foods, only: %i[new create edit update destroy]
+  end
+# For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
 end
