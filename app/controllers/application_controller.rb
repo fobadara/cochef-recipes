@@ -1,14 +1,28 @@
 class ApplicationController < ActionController::Base
-#   protect_from_forgery prepend: true
-#   before_action :authenticate_user!
+  add_flash_types :danger, :info, :warning, :success, :messages, :notice, :alert
   protect_from_forgery with: :exception
 
   before_action :update_allowed_parameters, if: :devise_controller?
+  layout :layout_by_resource
 
-  protected
+  def layout_by_resource
+    if devise_controller? && action_name != 'edit'
+      'devise'
+    else
+      'application'
+    end
+  end
 
   def update_allowed_parameters
-    devise_parameter_sanitizer.permit(:sign_up) { |u| u.permit(:name, :email, :password) }
-    devise_parameter_sanitizer.permit(:account_update) { |u| u.permit(:name, :email, :password, :current_password) }
+    devise_parameter_sanitizer.permit(:sign_up) do |u|
+      u.permit(:name, :password, :password_confirmation, :email, :image)
+    end
+    devise_parameter_sanitizer.permit(:account_update) do |u|
+      u.permit(:name, :password, :password_confirmation, :email, :current_password, :image)
+    end
   end
+
+  protected :update_allowed_parameters
+
+  private :layout_by_resource
 end
